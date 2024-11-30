@@ -4,11 +4,16 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prettier": "npx prettier src/ --write"
   },
   "devDependencies": {
+    "prettier": "^3.4.1",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "fuse.js": "^7.0.0"
+  }
 }
