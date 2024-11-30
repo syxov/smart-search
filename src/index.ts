@@ -3,11 +3,11 @@ import { MinHeap } from "@datastructures-js/heap";
 
 export interface Parameter<T> {
   values: T[];
-  getSearchString(value: T): string;
+  getSearchString?(value: T): string;
 }
 
 export interface NavOption<T> {
-  title: string;
+  keywords: string[];
   parameters: Parameter<T>[];
 }
 
@@ -51,36 +51,34 @@ export class SmartSearch<T> {
 
     for (const navOption of navOptions) {
       const generator = this.#combinationGenerator(navOption.parameters);
+      for (const keyword of navOption.keywords) {
+        for (const combination of generator) {
+          const combinationString = [
+            keyword,
+            ...combination.map((value, index) => {
+              const param = navOption.parameters[index];
+              return param.getSearchString?.(value) ?? value;
+            }),
+          ].join("");
 
-      for (const combination of generator) {
-        const combinationString = [
-          navOption.title,
-          ...combination.map((value, index) => {
-            const param = navOption.parameters[index];
-            return param.getSearchString(value);
-          }),
-        ].join("");
-
-        const options = {
-          includeScore: true,
-          threshold: 0.7,
-          keys: ["combination"],
-        };
-
-        const fuse = new Fuse([{ combination: combinationString }], options);
-        const result = fuse.search(userInput);
-
-        if (result.length > 0) {
-          const searchResult = {
-            option: navOption,
-            parameters: combination,
-            score: result[0].score!,
+          const options = {
+            includeScore: true,
+            threshold: 0.7,
           };
 
-          if (heap.size() < topN) {
-            heap.push(searchResult);
-          } else {
-            if (heap.root()!.score < searchResult.score!) {
+          const fuse = new Fuse([combinationString], options);
+          const result = fuse.search(userInput);
+
+          if (result.length > 0) {
+            const searchResult = {
+              option: navOption,
+              parameters: combination,
+              score: result[0].score!,
+            };
+
+            if (heap.size() < topN) {
+              heap.push(searchResult);
+            } else if (heap.root()!.score < searchResult.score!) {
               heap.extractRoot();
               heap.push(searchResult);
             }

@@ -1,7 +1,7 @@
 import { NavOption, SmartSearch } from "./index";
 
 const testConfig = {
-  title: "Test App",
+  keywords: ["Test App"],
   parameters: [],
 };
 
