@@ -1,4 +1,5 @@
 import Fuse from "fuse.js";
+import { MinHeap } from "@datastructures-js/heap";
 
 export interface Parameter<T> {
   values: T[];
@@ -46,7 +47,7 @@ export class SmartSearch<T> {
     navOptions: readonly NavOption<T>[],
     topN: number,
   ): SearchResult<T>[] {
-    const results: SearchResult<T>[] = [];
+    const heap = new MinHeap<SearchResult<T>>((val) => val.score);
 
     for (const navOption of navOptions) {
       const generator = this.#combinationGenerator(navOption.parameters);
@@ -70,17 +71,24 @@ export class SmartSearch<T> {
         const result = fuse.search(userInput);
 
         if (result.length > 0) {
-          results.push({
+          const searchResult = {
             option: navOption,
             parameters: combination,
             score: result[0].score!,
-          });
+          };
+
+          if (heap.size() < topN) {
+            heap.push(searchResult);
+          } else {
+            if (heap.root()!.score < searchResult.score!) {
+              heap.extractRoot();
+              heap.push(searchResult);
+            }
+          }
         }
       }
     }
 
-    results.sort((a, b) => a.score - b.score);
-
-    return results.slice(0, topN);
+    return heap.sort();
   }
 }
