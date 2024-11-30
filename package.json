@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "prettier": "npx prettier src/ --write",
     "test": "jest"
   },
@@ -23,5 +23,12 @@
   "dependencies": {
     "@datastructures-js/heap": "^4.3.3",
     "fuse.js": "^7.0.0"
+  },
+  "tsup": {
+    "entry": ["src/index.ts"],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true,
+    "dts": true
   }
 }
